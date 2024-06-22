@@ -1,0 +1,4 @@
+- lakukan go mod init startup => untuk awal initial modul project
+- go get -u github.com/gin-gonic/gin => untuk framework nya
+- go get -u gorm.io/gorm => untk db nya
+- go get -u gorm.io/driver/mysql => untk mysql
