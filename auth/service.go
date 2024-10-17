@@ -3,11 +3,14 @@ package auth
 import (
 	"time"
 
+	fmt "fmt"
+
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 type Service interface {
 	GenerateToken(userID int) (string, error)
+	ValidateToken(token string) (*jwt.Token, error)
 }
 
 type jwtService struct {
@@ -29,4 +32,17 @@ func (s *jwtService) GenerateToken(userID int) (string, error) {
 		return signedToken, err
 	}
 	return signedToken, nil
+}
+
+func (s *jwtService) ValidateToken(token string) (*jwt.Token, error) {
+	tkn, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
+		}
+		return []byte(SECRET_KEY), nil
+	})
+	if err != nil {
+		return tkn, err
+	}
+	return tkn, nil
 }
