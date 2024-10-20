@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"startup/auth"
+	"startup/campaign"
 	"startup/handler"
 	"startup/helper"
 	"startup/user"
@@ -21,12 +22,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	//START REPOSITORY
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
+	//END REPOSITORY
+
+	//START SERVICE
 	userService := user.NewService(userRepository)	
 	authService := auth.NewService()
+	campaignService := campaign.NewService(campaignRepository)		
+	//END SERVICE
 
-
+	//START HANDLER	
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
+	//END HANDLER	
 
 
 	router := gin.Default()
@@ -36,6 +46,9 @@ func main() {
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars",authMiddleware(authService,userService), userHandler.UploadAvatar)
+
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
+
 	router.Run(":8088")
 }
 
